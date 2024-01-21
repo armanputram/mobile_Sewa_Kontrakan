@@ -1,0 +1,481 @@
+//det
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:mobile_projek/pemilik/landingPemilik.dart';
+
+class Detail extends StatefulWidget {
+  final Map<String, dynamic> properti;
+
+  const Detail({Key? key, required this.properti}) : super(key: key);
+
+  @override
+  State<Detail> createState() => _DetailState();
+}
+
+class _DetailState extends State<Detail> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        toolbarHeight: 10,
+        automaticallyImplyLeading: false,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.only(right: 20, left: 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 350,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  color: Color.fromRGBO(40, 48, 72, 1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Container(
+                        height: 250,
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: _buildMainPhoto(),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10, right: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            widget.properti['nama'] ?? 'Nama Properti',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            'Rp.${widget.properti['harga'] ?? 0}/bulan',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 14,
+                              fontWeight: FontWeight.w300,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10, right: 10),
+                      child: Row(
+                        children: [
+                          Icon(Icons.map_sharp,
+                              size: 20, color: Colors.lightBlue),
+                          Text(
+                            widget.properti['alamat'] ?? 'Alamat Properti',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w300,
+                              fontSize: 14,
+                              color: Colors.lightBlue,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+                child: Text(
+                  'Foto',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 10, right: 10),
+                child: _buildPhotoList(),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+                child: Text(
+                  'Deskripsi',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 10, right: 10),
+                child: Text(
+                  widget.properti['deskripsi'] ?? 'Deskripsi tidak tersedia',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainPhoto() {
+    List<String>? photoList = widget.properti['foto'] is String
+        ? List<String>.from(json.decode(widget.properti['foto']))
+        : null;
+
+    String? mainPhotoUrl = photoList?.isNotEmpty == true
+        ? photoList![0].replaceAll('"', '')
+        : null;
+
+    return mainPhotoUrl != null
+        ? Stack(
+            children: [
+              Container(
+                height: 250,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  image: DecorationImage(
+                    image: CachedNetworkImageProvider(
+                      'http://10.0.2.2:8000/images/$mainPhotoUrl',
+                    ),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 0,
+                left: 0,
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LandingPagePemilik(),
+                      ),
+                    );
+                  },
+                  icon: Image.asset('assets/images/ardet.png'),
+                ),
+              ),
+              Positioned(
+                top: 5,
+                right: 5,
+                child: Icon(
+                  Icons.bookmark_add_rounded,
+                  size: 35,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          )
+        : Container(); // Tampilkan Container kosong jika foto utama tidak tersedia
+  }
+
+  void _showFullScreenImage(String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            height: 350,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              image: DecorationImage(
+                image: CachedNetworkImageProvider(imageUrl),
+                fit: BoxFit.contain, // Sesuaikan dengan kebutuhan Anda
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPhotoList() {
+    List<String>? photoList = widget.properti['foto'] is String
+        ? List<String>.from(json.decode(widget.properti['foto']))
+        : null;
+
+    return Container(
+      height: 80,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: (photoList?.length ?? 0),
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: () {
+              String imageUrl =
+                  'http://10.0.2.2:8000/images/${photoList![index].replaceAll('"', '')}';
+              _showFullScreenImage(imageUrl);
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: Container(
+                height: 80,
+                width: 80,
+                decoration: BoxDecoration(
+                  color: Colors.grey,
+                  borderRadius: BorderRadius.circular(15),
+                  image: DecorationImage(
+                    image: CachedNetworkImageProvider(
+                      'http://10.0.2.2:8000/images/${photoList![index].replaceAll('"', '')}',
+                    ),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+
+//bookmark
+import 'package:flutter/material.dart';
+
+class Bookmark extends StatefulWidget {
+  @override
+  State<Bookmark> createState() => _BookmarkState();
+}
+
+class _BookmarkState extends State<Bookmark> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color.fromRGBO(255, 246, 224, 1),
+      appBar: AppBar(
+        backgroundColor: Color.fromRGBO(255, 246, 224, 1),
+        toolbarHeight: 10,
+      ),
+      body: Center(
+        child: Text(
+          'Bookmark',
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
+
+//propitm
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:mobile_projek/detail.dart';
+
+import 'bookMan.dart';
+
+class PropertiItem extends StatefulWidget {
+  final Map<String, dynamic> properti;
+
+  const PropertiItem({required this.properti});
+
+  @override
+  _PropertiItemState createState() => _PropertiItemState();
+}
+
+class _PropertiItemState extends State<PropertiItem> {
+  late String mainPhotoUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    List<String> fotoList = widget.properti['foto'] != null
+        ? List<String>.from(json.decode(widget.properti['foto']))
+        : [];
+    mainPhotoUrl = fotoList.isNotEmpty ? fotoList[0].replaceAll('"', '') : '';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: Color.fromRGBO(40, 48, 72, 1),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 200,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Detail(
+                      properti: widget.properti,
+                    ),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    image: DecorationImage(
+                      image: CachedNetworkImageProvider(
+                        "http://10.0.2.2:8000/images/$mainPhotoUrl",
+                      ),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 5, right: 10, left: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Flexible(
+                  child: Text(
+                    widget.properti['nama'] ?? '',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+                Text(
+                  'Rp. ${widget.properti['harga']}/bulan',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w300,
+                    color: Colors.white,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 10),
+                child: Icon(
+                  Icons.map_sharp,
+                  color: Colors.lightBlue,
+                  size: 20,
+                ),
+              ),
+              Text(
+                widget.properti['alamat'] ?? '',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w200,
+                  color: Colors.lightBlue,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
+        ],
+      ),
+    );
+  }
+}
+
+
+
+
+
+
+//bookmark
+import 'package:flutter/material.dart';
+import 'package:mobile_projek/bookMan.dart';
+import 'package:mobile_projek/propertiItem.dart';
+
+class Bookmark extends StatefulWidget {
+  @override
+  State<Bookmark> createState() => _BookmarkState();
+}
+
+class _BookmarkState extends State<Bookmark> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Color.fromRGBO(255, 246, 224, 1),
+        toolbarHeight: 10,
+      ),
+      body: ListView.builder(
+        itemCount: BookmarkManager.bookmarkedProperties.length,
+        itemBuilder: (context, index) {
+          return PropertiItem(
+            properti: BookmarkManager.bookmarkedProperties[index],
+          );
+        },
+      ),
+    );
+  }
+}
+
+
+
+//bookMan
+class BookmarkManager {
+  static List<Map<String, dynamic>> bookmarkedProperties = [];
+
+  static void addBookmark(Map<String, dynamic> property) {
+    if (!bookmarkedProperties.contains(property)) {
+      bookmarkedProperties.add(property);
+    }
+  }
+
+  static void removeBookmark(Map<String, dynamic> property) {
+    bookmarkedProperties.remove(property);
+  }
+
+  static bool isBookmarked(Map<String, dynamic> property) {
+    return bookmarkedProperties.contains(property);
+  }
+}
+
